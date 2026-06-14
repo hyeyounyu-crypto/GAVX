@@ -1,0 +1,11 @@
+{
+  "name": "Remix: Predict.AI Estimator",
+  "description": "Predict.AI is a smart mobile prototype for vehicle accident cost and damage estimation.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
