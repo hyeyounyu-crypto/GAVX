@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GAVX</title>
+    <script>
+      // Safe environment wrap to prevent TypeError: Cannot set property fetch of #<Window> in sandboxed iframe preview
+      try {
+        if (window.fetch) {
+          const nativeFetch = window.fetch;
+          let configuredFetch = nativeFetch;
+          Object.defineProperty(window, 'fetch', {
+            configurable: true,
+            enumerable: true,
+            get() {
+              return configuredFetch;
+            },
+            set(val) {
+              configuredFetch = val;
+            }
+          });
+        }
+      } catch (e) {
+        // Fail-safe, do not block app execution
+      }
+    </script>
+    <script type="module" crossorigin src="/GAVX/assets/index-BImq2wRK.js"></script>
+    <link rel="stylesheet" crossorigin href="/GAVX/assets/index-B3O8BhFD.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+
