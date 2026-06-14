@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Camera, Trash2, X, Plus, Image as ImageIcon, ChevronLeft, ChevronRight, Upload } from 'lucide-react';
+import { Camera, Trash2, X, Plus, Image as ImageIcon, ChevronLeft, ChevronRight, Upload, Check } from 'lucide-react';
 import { UploadedPhoto } from '../types';
 import { MOCK_CRASH_SCENES } from '../data';
 
@@ -310,86 +310,119 @@ export default function PhotoView({ photos, setPhotos, lightMode, onNext, onCanc
       {/* CAMERA SCREEN VIEWFINDER OVERLAY - Screenshot 5-7 */}
       {showCamera && (
         <div className="absolute inset-0 bg-black z-50 flex flex-col justify-between overflow-hidden text-white font-sans select-none animate-fade-in">
+          {/* Live camera background */}
+          <div className="absolute inset-0">
+            <img
+              src="https://images.unsplash.com/photo-1617469767053-d3b508a0d822?auto=format&fit=crop&q=80&w=600"
+              alt="camera background view"
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+
           {/* Flash screen layer */}
           <div className={`absolute inset-0 bg-white z-[60] pointer-events-none transition-opacity duration-150 ${cameraFlash ? 'opacity-100' : 'opacity-0'}`}></div>
 
-          {/* Banner text at top */}
-          <div className="pt-12 px-6 pb-4 bg-gradient-to-b from-black to-transparent flex flex-col items-center">
-            <div className="w-11/12 py-3 px-4 rounded-full bg-black/60 border border-white/15 text-center backdrop-blur-md">
-              <span className="text-[11px] font-semibold text-neutral-100 block tracking-tight">
+          {/* Top banner pill - Screenshot 5-7 */}
+          <div className="pt-12 px-6 z-10 flex justify-center">
+            <div className="px-5 py-3 rounded-full bg-black/55 backdrop-blur-md text-center">
+              <span className="text-[12px] font-bold text-white block tracking-tight">
                 파손 부위는 가까이에서 선명하게 촬영해주세요!
               </span>
             </div>
-            <p className="text-[10px] text-neutral-400 mt-1">여러 장 찍고 한번에 업로드</p>
           </div>
 
-          {/* Viewfinder brackets in center */}
-          <div className="flex-1 relative flex items-center justify-center px-6">
-            <div className="absolute inset-0 opacity-70">
-              <img 
-                src="https://images.unsplash.com/photo-1617469767053-d3b508a0d822?auto=format&fit=crop&q=80&w=600" 
-                alt="white damaged car mock background view" 
-                className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
-              />
+          {/* Center corner brackets - white, turn neon once a shot is taken (Screenshot 7) */}
+          <div className="flex-1 relative flex items-center justify-center px-10 z-10">
+            <div className="relative w-full max-w-[280px] aspect-[1.5]">
+              {(() => {
+                const c = photos.length > 0 ? 'border-[#EAFF20]' : 'border-white';
+                return (
+                  <>
+                    <div className={`absolute top-0 left-0 w-10 h-10 border-t-[5px] border-l-[5px] rounded-tl-[20px] ${c}`}></div>
+                    <div className={`absolute top-0 right-0 w-10 h-10 border-t-[5px] border-r-[5px] rounded-tr-[20px] ${c}`}></div>
+                    <div className={`absolute bottom-0 left-0 w-10 h-10 border-b-[5px] border-l-[5px] rounded-bl-[20px] ${c}`}></div>
+                    <div className={`absolute bottom-0 right-0 w-10 h-10 border-b-[5px] border-r-[5px] rounded-br-[20px] ${c}`}></div>
+                  </>
+                );
+              })()}
             </div>
+          </div>
 
-            {/* Bracket box overlays - Screenshot 7 style */}
-            <div className="relative w-72 aspect-[1.4] border-2 border-dashed border-[#EAFF20]/40 rounded-3xl flex items-center justify-center z-10 bg-black/5">
-              <div className="absolute top-2 left-2 w-7 h-7 border-t-4 border-l-4 border-[#EAFF20] rounded-tl-xl"></div>
-              <div className="absolute top-2 right-2 w-7 h-7 border-t-4 border-r-4 border-[#EAFF20] rounded-tr-xl"></div>
-              <div className="absolute bottom-2 left-2 w-7 h-7 border-b-4 border-l-4 border-[#EAFF20] rounded-bl-xl"></div>
-              <div className="absolute bottom-2 right-2 w-7 h-7 border-b-4 border-r-4 border-[#EAFF20] rounded-br-xl"></div>
-              
-              <div className="text-[9px] uppercase tracking-widest font-mono text-[#EAFF20] bg-black/60 px-2 py-0.5 rounded font-bold">
-                AUTO FOCUS
+          {/* Bottom area */}
+          <div className="relative z-10 px-6 pb-8 flex flex-col gap-5">
+
+            {/* "여러 장 찍고 한번에 업로드" card - Screenshot 5-6 */}
+            <div className="w-full rounded-[24px] bg-white/85 backdrop-blur-md p-3 flex items-center gap-3 shadow-lg">
+              {/* Thumbnail with count badge */}
+              <div className="relative w-16 h-16 rounded-2xl bg-neutral-300 overflow-hidden flex items-center justify-center flex-shrink-0">
+                {photos.length > 0 ? (
+                  <img src={photos[photos.length - 1].url} alt="last shot" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                ) : (
+                  <ImageIcon size={28} className="text-neutral-400" />
+                )}
+                {photos.length > 0 && (
+                  <span className="absolute top-1 right-1 w-5 h-5 rounded-full bg-[#EAFF20] text-black text-[10px] font-extrabold flex items-center justify-center shadow">
+                    {photos.length}
+                  </span>
+                )}
               </div>
-            </div>
-          </div>
 
-          {/* Camera controls at bottom */}
-          <div className="p-6 pb-8 bg-gradient-to-t from-black to-transparent flex flex-col gap-4 z-10">
-            <div className="flex items-center justify-between px-6">
+              <div className="flex-1 leading-tight">
+                <p className="text-sm font-extrabold text-neutral-900">여러 장 찍고</p>
+                <p className="text-sm font-extrabold text-neutral-900">한번에 업로드</p>
+              </div>
+
+              {/* Confirm check square - grey when empty, black when ready */}
+              <button
+                onClick={() => {
+                  if (photos.length === 0) return;
+                  setShowCamera(false);
+                  setShowGalleryModal(false);
+                }}
+                disabled={photos.length === 0}
+                className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all active:scale-95
+                  ${photos.length > 0 ? 'bg-black text-white' : 'bg-neutral-300 text-neutral-500 cursor-not-allowed'}`}
+              >
+                <Check size={24} className="stroke-[3]" />
+              </button>
+            </div>
+
+            {/* Camera controls row - Screenshot 7 */}
+            <div className="flex items-center justify-between px-2">
               {/* Back to library */}
               <button
                 onClick={() => {
                   setShowCamera(false);
                   setShowGalleryModal(true);
                 }}
-                className="w-12 h-12 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center active:scale-95 transition-transform"
+                className="w-14 h-14 rounded-full bg-black text-white flex items-center justify-center active:scale-95 transition-transform shadow"
               >
-                <ChevronLeft size={22} />
+                <ChevronLeft size={24} />
               </button>
 
-              {/* Captured triggers - Large circular button */}
+              {/* Shutter */}
               <button
                 onClick={handleTriggerShutter}
-                className="w-20 h-20 rounded-full border-4 border-neutral-300 flex items-center justify-center active:scale-[0.88] transition-all bg-transparent"
+                className="w-20 h-20 rounded-full border-4 border-white/70 flex items-center justify-center active:scale-[0.9] transition-all bg-white/10"
               >
-                <div className="w-15 h-15 rounded-full bg-white"></div>
+                <div className="w-16 h-16 rounded-full bg-white"></div>
               </button>
 
-              {/* Complete checklist counts bubble - Screenshot 7 */}
-              <button
-                onClick={() => {
-                  setShowCamera(false);
-                  setShowGalleryModal(false);
-                }}
-                className={`w-12 h-12 rounded-full flex items-center justify-center active:scale-95 transition-all relative
-                  ${photos.length > 0 ? 'bg-[#EAFF20] text-black font-bold' : 'bg-neutral-900 text-neutral-600 cursor-not-allowed'}`}
-                disabled={photos.length === 0}
-              >
-                {photos.length > 0 ? (
-                  <>
-                    <ChevronRight size={24} />
-                    <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center font-bold">
-                      {photos.length}
-                    </span>
-                  </>
-                ) : (
-                  <ChevronRight size={24} />
-                )}
-              </button>
+              {/* Next arrow - appears neon once a photo exists (Screenshot 7) */}
+              {photos.length > 0 ? (
+                <button
+                  onClick={() => {
+                    setShowCamera(false);
+                    setShowGalleryModal(false);
+                  }}
+                  className="w-14 h-14 rounded-full bg-[#EAFF20] text-black flex items-center justify-center active:scale-95 transition-transform shadow"
+                >
+                  <ChevronRight size={26} className="stroke-[2.5]" />
+                </button>
+              ) : (
+                <div className="w-14 h-14"></div>
+              )}
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Calendar, Wrench, Shield, FileText, Home, Download, ArrowUpDown, ChevronDown, Check, X, FileCheck, Eye } from 'lucide-react';
+import { Sparkles, Wrench, Shield, FileText, Home, Download, ArrowUpDown, ChevronDown, Check, X } from 'lucide-react';
 import { UploadedPhoto, IncidentDetails, DamagePart, SeatStatus, SimilarCase } from '../types';
 import { SIMILAR_CASES } from '../data';
 
@@ -44,43 +44,43 @@ export default function ReportView({
   const [maxCost, setMaxCost] = useState(550);
   const [daysCount, setDaysCount] = useState(2);
 
-  // Sync calculation parameters to keep experience fully responsive
+  // Sync calculation parameters to keep experience fully responsive.
+  // The default scenario (no specific parts selected) intentionally resolves
+  // to the canonical mockup figures: 320 / 100 / 65 = 485만원.
   useEffect(() => {
-    const activePartsCount = damageParts.filter(p => p.selected).length;
-    const activeSeatsCount = dirtySeats.filter(s => s.selected).length;
+    const partsCount = damageParts.filter(p => p.selected).length;
+    const seatsCount = dirtySeats.filter(s => s.selected).length;
 
-    // Simulate reactive pricing based on parts chosen
-    let computedRepair = 180 + activePartsCount * 50; 
-    if (activePartsCount === 0) {
-      computedRepair = activeCategories.includes('damaged') ? 240 : 0;
-    }
+    // 1) 예상 수리비 — base + parts + severity + cleaning add-on
+    const baseRepair = partsCount === 0 ? 320 : 220 + partsCount * 45;
+    const severityAdj = Math.round((damageSeverity - 35) * 1.2); // 0 at default severity
+    const cleanAdd = seatsCount * 15 + (seatsCount > 0 ? Math.round(dirtSeverity * 0.2) : 0);
+    const computedRepair = Math.max(50, baseRepair + severityAdj + cleanAdd);
 
-    let computedClean = activeSeatsCount * 15;
-    if (activeSeatsCount === 0) {
-      computedClean = activeCategories.includes('condition') ? 45 : 0;
-    }
+    // 2) 자차 면책금 — fixed self-pay deductible (consistent with all similar cases)
+    const computedSelfPay = 100;
 
-    const subTotalRepairAndClean = computedRepair + computedClean;
+    // 3) 휴차료 — driven by repair days
+    const computedDays = Math.max(1, 2 + Math.round((damageSeverity - 35) / 30) + Math.floor(partsCount / 2));
+    const computedIdle = partsCount === 0 && computedDays === 2 ? 65 : computedDays * 32;
 
-    // Deductible mapping (default 100만원 self-pay or chosen model)
-    const selfPayValue = details.selectedInsurance ? Math.round(details.selectedInsurance / 10000) : 100;
-    const computedSelfPay = subTotalRepairAndClean > 10 ? selfPayValue : 5;
+    const calculatedSum = computedRepair + computedSelfPay + computedIdle;
 
-    // Idle cost based on severity
-    const computedDays = Math.max(1, Math.round(1 + (damageSeverity / 100) * 3 + activePartsCount * 0.5));
-    const computedIdle = computedDays * 14; // 14만원 per day
-
-    const calculatedSum = (subTotalRepairAndClean > 0 ? subTotalRepairAndClean : 260) + computedSelfPay + computedIdle;
-
-    setRepairCost(subTotalRepairAndClean > 0 ? subTotalRepairAndClean : 320);
+    setRepairCost(computedRepair);
     setInsuranceCost(computedSelfPay);
     setIdleCost(computedIdle);
     setDaysCount(computedDays);
-    setTotalCost(calculatedSum > 100 ? calculatedSum : 485);
+    setTotalCost(calculatedSum);
 
-    setMinCost(Math.round((calculatedSum > 100 ? calculatedSum : 485) * 0.88));
-    setMaxCost(Math.round((calculatedSum > 100 ? calculatedSum : 485) * 1.14));
+    setMinCost(Math.round(calculatedSum * 0.87));
+    setMaxCost(Math.round(calculatedSum * 1.13));
   }, [damageParts, dirtySeats, damageSeverity, dirtSeverity, details, activeCategories]);
+
+  // Similar-case average + AI prediction gap (computed, not hard-coded)
+  const similarAvg = Math.round(
+    SIMILAR_CASES.reduce((sum, c) => sum + c.totalCost, 0) / SIMILAR_CASES.length
+  );
+  const diffPct = ((totalCost - similarAvg) / similarAvg) * 100;
 
   // Sorting logics
   const getSortedCases = () => {
@@ -163,7 +163,7 @@ export default function ReportView({
               </div>
               <div className="text-right font-mono text-[8px] text-neutral-400 leading-relaxed">
                 REF_NO: gc_{Date.now().toString().slice(-6)}<br />
-                GEN_DATE: 2026.06.14
+                GEN_DATE: {new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\.\s?/g, '.').replace(/\.$/, '')}
               </div>
             </div>
 
@@ -291,10 +291,10 @@ export default function ReportView({
           </div>
 
           {/* Card 2: 2 Days 소요 Black Card - Screenshot 16 */}
-          <div className="p-5 rounded-[28px] bg-neutral-950 border border-neutral-850 text-white flex justify-between items-center mb-4 shadow-sm select-none">
+          <div className="p-5 rounded-[28px] bg-neutral-950 border border-neutral-850 text-white flex flex-col gap-2 mb-4 shadow-sm select-none">
             <span className="text-xs text-neutral-400 font-semibold">최종 견적 확정까지</span>
-            <span className="text-xs font-extrabold text-[#EAFF20] bg-neutral-900 px-3 py-1.5 rounded-full border border-neutral-800">
-              # 약 {daysCount}일 소요
+            <span className="text-2xl font-black text-[#EAFF20] tracking-tight leading-none">
+              약 {daysCount}일 소요
             </span>
           </div>
 
@@ -306,20 +306,29 @@ export default function ReportView({
 
             <div className="flex flex-col gap-4 text-xs font-bold font-sans">
               <div className="flex justify-between items-center">
-                <span className="text-neutral-400 flex items-center gap-1.5 font-medium">
-                  🔧 예상 수리비
+                <span className="text-neutral-300 flex items-center gap-2.5 font-medium">
+                  <span className="w-7 h-7 rounded-full bg-[#EAFF20] text-black flex items-center justify-center">
+                    <Wrench size={13} className="stroke-[2.5]" />
+                  </span>
+                  예상 수리비
                 </span>
                 <span className="font-mono">{repairCost}만원</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-neutral-400 flex items-center gap-1.5 font-medium">
-                  🛡️ 자차 면책금
+                <span className="text-neutral-300 flex items-center gap-2.5 font-medium">
+                  <span className="w-7 h-7 rounded-full bg-neutral-800 text-neutral-200 flex items-center justify-center">
+                    <Shield size={13} className="stroke-[2.5]" />
+                  </span>
+                  자차 면책금
                 </span>
                 <span className="font-mono">{insuranceCost}만원</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-neutral-400 flex items-center gap-1.5 font-medium">
-                  📁 휴차료
+                <span className="text-neutral-300 flex items-center gap-2.5 font-medium">
+                  <span className="w-7 h-7 rounded-full bg-neutral-800 text-neutral-200 flex items-center justify-center">
+                    <FileText size={13} className="stroke-[2.5]" />
+                  </span>
+                  휴차료
                 </span>
                 <span className="font-mono">{idleCost}만원</span>
               </div>
@@ -384,7 +393,7 @@ export default function ReportView({
               </div>
               <div>
                 <p className="text-[10px] text-neutral-400 font-bold">유사 사례 평균</p>
-                <span className="text-lg font-black text-white font-sans mt-0.5 block">491만원</span>
+                <span className="text-lg font-black text-white font-sans mt-0.5 block">{similarAvg}만원</span>
               </div>
             </div>
 
@@ -392,11 +401,14 @@ export default function ReportView({
               <div>
                 <span className="text-[10px] text-neutral-400 block font-bold">예측 차이</span>
                 <span className="text-xs text-neutral-200 mt-1 block font-bold">
-                  AI 예측이 유사 사례 평균보다 <span className="text-[#EAFF20]">1.2% 낮습니다</span>
+                  AI 예측이 유사 사례 평균보다 <span className="text-[#EAFF20]">{Math.abs(diffPct).toFixed(1)}% {diffPct <= 0 ? '낮습니다' : '높습니다'}</span>
                 </span>
               </div>
-              <div className="px-2.5 py-1 rounded-full bg-[#1A331E] border border-green-800 text-green-400 text-[10.5px] font-mono font-extrabold tracking-tight">
-                -1.2%
+              <div className={`px-2.5 py-1 rounded-full text-[10.5px] font-mono font-extrabold tracking-tight border
+                ${diffPct <= 0
+                  ? 'bg-[#1A331E] border-green-800 text-green-400'
+                  : 'bg-[#331A1A] border-red-800 text-red-400'}`}>
+                {diffPct <= 0 ? '' : '+'}{diffPct.toFixed(1)}%
               </div>
             </div>
           </div>
@@ -534,7 +546,7 @@ export default function ReportView({
                 </div>
                 <div className="mt-1">
                   <span className="text-neutral-500 block text-[9px] uppercase tracking-wider font-mono">Accident Type</span>
-                  <p className="font-extrabold text-[#EAFF20] mt-0.5">{selectedCase.accidentType}</p>
+                  <p className="font-extrabold text-[#EAFF20] mt-0.5">{selectedCase.damageType}</p>
                 </div>
                 <div className="mt-1">
                   <span className="text-neutral-500 block text-[9px] uppercase tracking-wider font-mono">Total Damage Cost</span>
@@ -548,7 +560,7 @@ export default function ReportView({
                   사고 상황 및 조치 내역
                 </span>
                 <p className="text-xs text-neutral-300 leading-relaxed leading-normal bg-neutral-900/20 border border-neutral-850 p-4 rounded-2xl font-sans">
-                  {selectedCase.description || "해당 테슬라 차량은 삼거리 교차로 부근에서 후진 중 벽면에 도색된 연석 기둥을 접촉하여 전방 범퍼의 미세 찌그러짐과 안개등 외관에 파손이 발생했습니다. 자차 면책 가입 플랜을 통해 자기부담금 100만원을 완납하고 빠르게 종결되었습니다."}
+                  {selectedCase.damageDetail}
                 </p>
               </div>
 

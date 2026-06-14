@@ -89,15 +89,21 @@ export default function DeviceFrame({ children, lightMode, setLightMode, title, 
               {title || 'Predict.AI'}
             </h1>
 
-            {/* Mode Switcher */}
+            {/* Mode Switcher - iOS style pill toggle (matches mockup) */}
             <button
               id="theme-toggle-button"
               onClick={() => setLightMode(!lightMode)}
-              className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors
-                ${lightMode ? 'hover:bg-slate-200 text-amber-500' : 'hover:bg-neutral-800 text-neon'}`}
               title="테마 변경"
+              className={`relative w-[52px] h-7 rounded-full flex items-center transition-colors duration-300 px-1
+                ${lightMode ? 'bg-slate-200' : 'bg-black'}`}
             >
-              {lightMode ? <Sun size={18} /> : <Moon size={18} />}
+              {/* Knob */}
+              <div
+                className={`absolute w-5 h-5 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-300
+                  ${lightMode ? 'left-1 text-amber-500' : 'left-[26px] text-neutral-700'}`}
+              >
+                {lightMode ? <Sun size={12} /> : <Moon size={12} />}
+              </div>
             </button>
           </div>
 

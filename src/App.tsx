@@ -11,7 +11,7 @@ import { ScreenType, UploadedPhoto, DamagePart, SeatStatus, IncidentDetails } fr
 
 export default function App() {
   const [screen, setScreen] = useState<ScreenType>('photo');
-  const [lightMode, setLightMode] = useState<boolean>(false);
+  const [lightMode, setLightMode] = useState<boolean>(true);
 
   // Core State Holders holding data across steps
   const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
@@ -34,7 +34,7 @@ export default function App() {
   ]);
   const [dirtSeverity, setDirtSeverity] = useState<number>(25);
 
-  const [activeCategories, setActiveCategories] = useState<string[]>(['damaged']);
+  const [activeCategories, setActiveCategories] = useState<string[]>([]);
 
   const [details, setDetails] = useState<IncidentDetails>({
     involvedParties: ['car'],
@@ -49,7 +49,7 @@ export default function App() {
     setDamageSeverity(35);
     setDirtySeats(prev => prev.map(s => ({ ...s, selected: false })));
     setDirtSeverity(25);
-    setActiveCategories(['damaged']);
+    setActiveCategories([]);
     setDetails({
       involvedParties: ['car'],
       accidentDetailsText: '',

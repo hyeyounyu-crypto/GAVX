@@ -44,6 +44,7 @@ export interface SimilarCase {
   idleCost: number; // in 만원
   totalCost: number; // in 만원
   date: string;
+  location: string;
   damageType: string;
   damageDetail: string;
   images: string[];

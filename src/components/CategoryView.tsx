@@ -34,7 +34,7 @@ export default function CategoryView({
   setActiveCategories
 }: CategoryViewProps) {
   // Currently expanded block: 'undrivable' | 'damaged' | 'condition' | 'ect'
-  const [expandedSection, setExpandedSection] = useState<'undrivable' | 'damaged' | 'condition' | 'ect' | null>('damaged');
+  const [expandedSection, setExpandedSection] = useState<'undrivable' | 'damaged' | 'condition' | 'ect' | null>(null);
   
   // Selected model name state
   const [carModel, setCarModel] = useState<string>('테슬라 모델 S');
@@ -108,10 +108,7 @@ export default function CategoryView({
         
         {/* =================== OPTION 1: Undrivable. Card - Screenshot 10 =================== */}
         <div 
-          className={`rounded-[32px] overflow-hidden border transition-all duration-300 shadow-sm
-            ${expandedSection === 'undrivable' 
-              ? 'bg-[#EAFF20] border-[#EAFF20] text-black' 
-              : 'bg-neutral-50 border-neutral-250 text-neutral-800'}`}
+          className="rounded-[32px] overflow-hidden border border-[#EAFF20] bg-[#EAFF20] text-black transition-all duration-300 shadow-sm"
         >
           {/* Header */}
           <div 
@@ -222,7 +219,7 @@ export default function CategoryView({
           className={`rounded-[32px] overflow-hidden border transition-all duration-300 shadow-sm
             ${expandedSection === 'damaged' 
               ? 'bg-[#111111] border-[#111111] text-white' 
-              : 'bg-neutral-50 border-neutral-250 text-neutral-800'}`}
+              : 'bg-neutral-300 border-neutral-300 text-neutral-900'}`}
         >
           {/* Header */}
           <div 
@@ -254,7 +251,7 @@ export default function CategoryView({
             <div className="flex items-center gap-1.5">
               <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold
                 ${expandedSection === 'damaged' ? 'bg-[#EAFF20]/20 text-[#EAFF20]' : 'bg-neutral-200 text-neutral-600'}`}>
-                {damageParts.filter(p => p.selected).length}석 파손
+                {damageParts.filter(p => p.selected).length}곳 파손
               </span>
               {expandedSection === 'damaged' ? <ChevronUp size={18} className="text-white" /> : <ChevronDown size={18} />}
             </div>
@@ -394,7 +391,7 @@ export default function CategoryView({
           className={`rounded-[32px] overflow-hidden border transition-all duration-300 shadow-sm
             ${expandedSection === 'condition' 
               ? 'bg-white border-neutral-250 text-black shadow-lg' 
-              : 'bg-neutral-50 border-neutral-250 text-neutral-800'}`}
+              : 'bg-neutral-200 border-neutral-200 text-neutral-900'}`}
         >
           {/* Header */}
           <div 
@@ -528,10 +525,7 @@ export default function CategoryView({
 
         {/* =================== OPTION 4: Ect. Card =================== */}
         <div 
-          className={`rounded-[32px] overflow-hidden border transition-all duration-300 shadow-sm
-            ${expandedSection === 'ect' 
-              ? 'bg-neutral-900 border-neutral-900 text-white' 
-              : 'bg-neutral-50 border-neutral-250 text-neutral-800'}`}
+          className="rounded-[32px] overflow-hidden border border-neutral-900 bg-neutral-900 text-white transition-all duration-300 shadow-sm"
         >
           {/* Header */}
           <div 
